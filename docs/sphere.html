@@ -163,7 +163,7 @@
       scene.add(axesGroup);
 
       let sphereMesh = null;
-      let radius = 1;
+      let radius = 0.1;
       let centerX = 0;
       let formulaMesh = null;
 
@@ -234,7 +234,7 @@
           const trackLength = maxX - minX;
           let minVal, maxVal;
           if (name === 'radius') {
-            minVal = 0.5;
+            minVal = 0.1;
             maxVal = 5;
           } else {
             minVal = -2;
