@@ -53,3 +53,5 @@ Network e hardware in 3D: https://education.carraro-lab.com/catalogo-dei-laborat
 Virtual Hospitality: https://education.carraro-lab.com/catalogo-dei-laboratori-didattici/istituti-tecnici,turismo/virtual-hospitality/
 
 Catalogo Istituti Tecnici: https://education.carraro-lab.com/catalogo-dei-laboratori-didattici-istituti-tecnici/
+
+XR Edu Lab: https://www.xredulab.com
