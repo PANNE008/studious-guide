@@ -30,6 +30,7 @@
     .foot{margin-top:36px;color:#475569;text-align:center}
     .cta{display:inline-block;margin-top:18px;padding:10px 16px;border-radius:8px;background:var(--accent);color:#fff;text-decoration:none;font-weight:700}
   </style>
+  <script src="vendor/jquery/jquery.min.js"></script>
 </head>
 <body>
   <div class="wrap">
@@ -98,7 +99,13 @@
 
     <div class="foot">
       <p>Vuoi aiutare a creare esperienze per insegnanti e studenti?<br /><a class="cta" href="https://github.com/aab016/studious-guide/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer">Contribuisci</a></p>
-      <p style="margin-top:12px"><a class="cta" href="https://www.oculus.com/open_url/?url=https://aab016.github.io/studious-guide/" target="_blank" rel="noopener noreferrer">Apri in Meta Quest</a></p>
+      <p style="margin-top:12px"><a id="open-in-meta-quest" class="cta" href="https://www.oculus.com/open_url/?url=https://aab016.github.io/studious-guide/" target="_blank" rel="noopener noreferrer">Apri in Meta Quest</a></p>
+      <script>
+        $(function() {
+          window_location_href = window.location.href;
+        document.getElementById("open-in-meta-quest").href = "https://www.oculus.com/open_url/?url=" + encodeURIComponent(window_location_href);
+        });
+      </script>
       <p style="margin-top:12px;color:#475569;font-size:0.95rem">Contributors: <a href="contributors/aab016.html">aab016</a></p>
     </div>
   </div>
