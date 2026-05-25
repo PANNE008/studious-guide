@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metaverso a Scuola | Hub Didattico VR</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --cyan: #00f5ff;
+            --purple: #b829dd;
+            --pink: #ff006e;
+            --dark: #050508;
+            --darker: #020204;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--darker);
+            color: #fff;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        /* Custom Cursor */
+        .cursor {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--cyan);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.1s;
+            mix-blend-mode: difference;
+        }
+
+        .cursor-follower {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 245, 255, 0.1);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9998;
+            transition: transform 0.3s ease;
+        }
+
+        /* Animated Background Grid */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 245, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 245, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            perspective: 1000px;
+            transform-style: preserve-3d;
+            animation: gridMove 20s linear infinite;
+            z-index: -2;
+        }
+
+        @keyframes gridMove {
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(50px); }
+        }
+
+        /* Floating Orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            z-index: -1;
+            animation: float 10s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--purple);
+            top: -100px;
+            right: -100px;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 300px;
+            height: 300px;
+            background: var(--cyan);
+            bottom: -50px;
+            left: -50px;
+            animation-delay: -3s;
+        }
+
+        .orb-3 {
+            width: 250px;
+            height: 250px;
+            background: var(--pink);
+            top: 50%;
+            left: 50%;
+            animation-delay: -6s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+
+        /* Noise Overlay */
+        .noise {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9990;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Header con Glitch Effect */
+        header {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        .glitch-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .glitch {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(3rem, 10vw, 7rem);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #fff;
+            position: relative;
+            text-shadow: 
+                0.05em 0 0 var(--pink),
+                -0.05em -0.025em 0 var(--cyan),
+                0.025em 0.05em 0 var(--purple);
+            animation: glitch 2s infinite;
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .glitch::before {
+            left: 2px;
+            text-shadow: -2px 0 var(--pink);
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+            animation: glitch-anim-1 2s infinite linear alternate-reverse;
+        }
+
+        .glitch::after {
+            left: -2px;
+            text-shadow: -2px 0 var(--cyan);
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+            animation: glitch-anim-2 2s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch {
+            0% { text-shadow: 0.05em 0 0 var(--pink), -0.05em -0.025em 0 var(--cyan), 0.025em 0.05em 0 var(--purple); }
+            14% { text-shadow: 0.05em 0 0 var(--pink), -0.05em -0.025em 0 var(--cyan), 0.025em 0.05em 0 var(--purple); }
+            15% { text-shadow: -0.05em -0.025em 0 var(--pink), 0.025em 0.025em 0 var(--cyan), -0.05em -0.05em 0 var(--purple); }
+            49% { text-shadow: -0.05em -0.025em 0 var(--pink), 0.025em 0.025em 0 var(--cyan), -0.05em -0.05em 0 var(--purple); }
+            50% { text-shadow: 0.025em 0.05em 0 var(--pink), 0.05em 0 0 var(--cyan), 0 -0.05em 0 var(--purple); }
+            99% { text-shadow: 0.025em 0.05em 0 var(--pink), 0.05em 0 0 var(--cyan), 0 -0.05em 0 var(--purple); }
+            100% { text-shadow: -0.025em 0 0 var(--pink), -0.025em -0.025em 0 var(--cyan), -0.025em -0.05em 0 var(--purple); }
+        }
+
+        @keyframes glitch-anim-1 {
+            0% { clip-path: polygon(0 2%, 100% 2%, 100% 5%, 0 5%); }
+            20% { clip-path: polygon(0 15%, 100% 15%, 100% 15%, 0 15%); }
+            40% { clip-path: polygon(0 10%, 100% 10%, 100% 20%, 0 20%); }
+            60% { clip-path: polygon(0 1%, 100% 1%, 100% 2%, 0 2%); }
+            80% { clip-path: polygon(0 33%, 100% 33%, 100% 33%, 0 33%); }
+            100% { clip-path: polygon(0 44%, 100% 44%, 100% 46%, 0 46%); }
+        }
+
+        @keyframes glitch-anim-2 {
+            0% { clip-path: polygon(0 50%, 100% 50%, 100% 60%, 0 60%); }
+            20% { clip-path: polygon(0 20%, 100% 20%, 100% 30%, 0 30%); }
+            40% { clip-path: polygon(0 70%, 100% 70%, 100% 80%, 0 80%); }
+            60% { clip-path: polygon(0 40%, 100% 40%, 100% 45%, 0 45%); }
+            80% { clip-path: polygon(0 85%, 100% 85%, 100% 90%, 0 90%); }
+            100% { clip-path: polygon(0 12%, 100% 12%, 100% 15%, 0 15%); }
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            font-weight: 300;
+            letter-spacing: 0.3em;
+            margin-top: 1.5rem;
+            opacity: 0;
+            animation: fadeInUp 1s ease 0.5s forwards;
+            background: linear-gradient(90deg, var(--cyan), var(--purple), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+        }
+
+        .scroll-indicator::before {
+            content: '';
+            width: 30px;
+            height: 50px;
+            border: 2px solid var(--cyan);
+            border-radius: 25px;
+            display: block;
+            position: relative;
+        }
+
+        .scroll-indicator::after {
+            content: '';
+            width: 4px;
+            height: 10px;
+            background: var(--cyan);
+            border-radius: 2px;
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: scroll 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-20px); }
+            60% { transform: translateX(-50%) translateY(-10px); }
+        }
+
+        @keyframes scroll {
+            0% { opacity: 1; top: 10px; }
+            100% { opacity: 0; top: 30px; }
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Sections */
+        .section {
+            margin-bottom: 6rem;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease;
+        }
+
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+            display: inline-block;
+            overflow: hidden;
+        }
+
+        .section-title::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--cyan), var(--purple), var(--pink));
+            transform: translateX(-100%);
+            animation: slideIn 1s ease forwards;
+        }
+
+        @keyframes slideIn {
+            to { transform: translateX(0); }
+        }
+
+        /* Cards con effetto 3D */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 245, 255, 0.1);
+            border-radius: 20px;
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            cursor: pointer;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.1), transparent);
+            transition: left 0.7s;
+        }
+
+        .card:hover::before {
+            left: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-10px) rotateX(5deg) rotateY(5deg);
+            border-color: var(--cyan);
+            box-shadow: 
+                0 20px 60px rgba(0, 245, 255, 0.2),
+                0 0 0 1px rgba(0, 245, 255, 0.3);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+            filter: drop-shadow(0 0 10px var(--cyan));
+        }
+
+        .card h3 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--cyan);
+        }
+
+        .card p {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+        }
+
+        .card-number {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-family: 'Orbitron', monospace;
+            font-size: 4rem;
+            font-weight: 900;
+            color: rgba(0, 245, 255, 0.05);
+            transition: all 0.3s;
+        }
+
+        .card:hover .card-number {
+            color: rgba(0, 245, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        /* Buttons */
+        .btn-container {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 3rem 0;
+        }
+
+        .btn {
+            padding: 1.2rem 3rem;
+            font-family: 'Orbitron', monospace;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+            background: transparent;
+            color: #fff;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            box-shadow: 0 10px 30px rgba(0, 245, 255, 0.3);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 245, 255, 0.5);
+        }
+
+        .btn-secondary {
+            border: 2px solid var(--cyan);
+            color: var(--cyan);
+        }
+
+        .btn-secondary:hover {
+            background: var(--cyan);
+            color: var(--dark);
+            box-shadow: 0 0 30px var(--cyan);
+        }
+
+        /* Video Section */
+        .video-container {
+            position: relative;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 245, 255, 0.2);
+        }
+
+        .video-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--cyan), var(--purple), var(--pink));
+            z-index: -1;
+            border-radius: 30px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .video-container:hover::before {
+            opacity: 1;
+            animation: borderRotate 3s linear infinite;
+        }
+
+        @keyframes borderRotate {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%;
+            background: var(--dark);
+        }
+
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            background: rgba(0, 245, 255, 0.1);
+            border: 1px solid var(--cyan);
+            border-radius: 50px;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.9rem;
+            margin: 1rem 0;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 245, 255, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(0, 245, 255, 0); }
+        }
+
+        .badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--cyan);
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 4rem 2rem;
+            border-top: 1px solid rgba(0, 245, 255, 0.1);
+            margin-top: 6rem;
+            position: relative;
+        }
+
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .footer-link {
+            display: inline-block;
+            margin-top: 1.5rem;
+            padding: 1rem 2.5rem;
+            border: 1px solid var(--cyan);
+            border-radius: 50px;
+            color: var(--cyan);
+            text-decoration: none;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: var(--cyan);
+            transition: width 0.3s;
+            z-index: -1;
+        }
+
+        .footer-link:hover::before {
+            width: 100%;
+        }
+
+        .footer-link:hover {
+            color: var(--dark);
+            box-shadow: 0 0 30px var(--cyan);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .card-grid { grid-template-columns: 1fr; }
+            .glitch { font-size: 2.5rem; }
+            .subtitle { font-size: 1rem; letter-spacing: 0.2em; }
+            body { cursor: auto; }
+            .cursor, .cursor-follower { display: none; }
+        }
+
+        /* Loading Animation */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--darker);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+
+        .loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader-text {
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            color: var(--cyan);
+            animation: loaderPulse 1.5s infinite;
+        }
+
+        @keyframes loaderPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.95); }
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loader -->
+    <div class="loader" id="loader">
+        <div class="loader-text">INITIALIZING VR HUB...</div>
+    </div>
+
+    <!-- Custom Cursor -->
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+
+    <!-- Background Effects -->
+    <div class="bg-grid"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="noise"></div>
+
+    <!-- Header -->
+    <header>
+        <div class="glitch-wrapper">
+            <h1 class="glitch" data-text="METAVERSO A SCUOLA">METAVERSO A SCUOLA</h1>
+        </div>
+        <p class="subtitle">EDUCATION REIMAGINED</p>
+        <div class="scroll-indicator"></div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Intro Section -->
+        <section class="section">
+            <div class="badge">SYSTEM READY</div>
+            <h2 class="section-title">Benvenuti nel Futuro</h2>
+            <p style="font-size: 1.3rem; line-height: 1.8; color: rgba(255,255,255,0.8); max-width: 900px; margin: 2rem 0;">
+                Una piattaforma rivoluzionaria che integra la Realtà Virtuale nell'insegnamento quotidiano. 
+                Progettata da studenti di Informatica per docenti che vogliono innovare senza complicazioni.
+            </p>
+            <div class="btn-container">
+                <button class="btn btn-primary" onclick="document.getElementById('catalogo').scrollIntoView({behavior: 'smooth'})">
+                    Esplora Esperienze
+                </button>
+                <button class="btn btn-secondary" onclick="document.getElementById('video').scrollIntoView({behavior: 'smooth'})">
+                    Guarda Demo
+                </button>
+            </div>
+        </section>
+
+        <!-- Video Section -->
+        <section class="section" id="video">
+            <h2 class="section-title">Presentazione</h2>
+            <div class="video-container">
+                <div class="video-wrapper">
+                    <iframe src="https://www.youtube.com/embed/INSERISCI_ID_VIDEO" 
+                            title="Presentazione Metaverso a Scuola" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+        </section>
+
+        <!-- Catalog Section -->
+        <section class="section" id="catalogo">
+            <h2 class="section-title">Catalogo Esperienze</h2>
+            <div class="card-grid">
+                <div class="card" onclick="showExperiences('storia')">
+                    <span class="card-number">01</span>
+                    <span class="card-icon">🏛️</span>
+                    <h3>Storia Antica</h3>
+                    <p>Esplora il Foro Romano e l'Acropoli di Atene in ricostruzioni 3D fotorealistiche. 
+                       Viaggia nel tempo e vivi la storia in prima persona.</p>
+                </div>
+
+                <div class="card" onclick="showExperiences('scienze')">
+                    <span class="card-number">02</span>
+                    <span class="card-icon">🧬</span>
+                    <h3>Scienze & Biologia</h3>
+                    <p>Viaggia dentro una cellula o esplora il sistema solare. Laboratori virtuali 
+                       interattivi per comprendere concetti complessi.</p>
+                </div>
+
+                <div class="card" onclick="showExperiences('matematica')">
+                    <span class="card-number">03</span>
+                    <span class="card-icon">📐</span>
+                    <h3>Matematica VR</h3>
+                    <p>Visualizza funzioni matematiche in 3D, manipola grafici nello spazio e 
+                       scopri la geometria solida in modo immersivo.</p>
+                </div>
+
+                <div class="card" onclick="showExperiences('arte')">
+                    <span class="card-number">04</span>
+                    <span class="card-icon">🎨</span>
+                    <h3>Arte & Architettura</h3>
+                    <p>Ammira la Cappella Sistina da vicino o esplora cattedrali gotiche. 
+                       L'arte prende vita in dimensioni impossibili nella realtà.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Experiences Display -->
+        <div id="experiences-container" style="margin-top: 3rem;"></div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p style="font-size: 1.2rem; margin-bottom: 1rem;">
+                Sviluppato da <strong style="color: var(--cyan);">Pannella & Mezzani</strong>
+            </p>
+            <p style="color: rgba(255,255,255,0.6); margin-bottom: 2rem;">
+                Classe di Informatica • Progetto "Metaverso a Scuola"
+            </p>
+            <a href="pannella_mezzani.html" class="footer-link">TEAM & DOCS</a>
+        </div>
+    </footer>
+
+    <script>
+        // Remove loader
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('hidden');
+            }, 1500);
+        });
+
+        // Custom Cursor
+        const cursor = document.querySelector('.cursor');
+        const cursorFollower = document.querySelector('.cursor-follower');
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            
+            setTimeout(() => {
+                cursorFollower.style.left = e.clientX - 10 + 'px';
+                cursorFollower.style.top = e.clientY - 10 + 'px';
+            }, 100);
+        });
+
+        document.addEventListener('mousedown', () => {
+            cursor.style.transform = 'scale(0.8)';
+        });
+
+        document.addEventListener('mouseup', () => {
+            cursor.style.transform = 'scale(1)';
+        });
+
+        // Hover effects for cursor
+        document.querySelectorAll('a, button, .card').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursor.style.transform = 'scale(1.5)';
+                cursor.style.borderColor = '#b829dd';
+            });
+            el.addEventListener('mouseleave', () => {
+                cursor.style.transform = 'scale(1)';
+                cursor.style.borderColor = '#00f5ff';
+            });
+        });
+
+        // Scroll Reveal
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.section').forEach(section => {
+            observer.observe(section);
+        });
+
+        // 3D Card Effect
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = (y - centerY) / 10;
+                const rotateY = (centerX - x) / 10;
+                
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(20px)`;
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateZ(0)';
+            });
+        });
+
+        // Show Experiences
+        const experiences = {
+            storia: [
+                { title: 'Foro Romano 3D', desc: 'Ricostruzione architettonica in scala 1:1 con punti interattivi' },
+                { title: 'Acropoli di Atene', desc: 'Tour virtuale del Partenone con dettagli storici' }
+            ],
+            scienze: [
+                { title: 'Dentro la Cellula', desc: 'Esplorazione microscopica di organelli cellulari' },
+                { title: 'Sistema Solare', desc: 'Simulazione orbitale con leggi di Keplero' }
+            ],
+            matematica: [
+                { title: 'Grafici 3D', desc: 'Manipolazione funzioni matematiche nello spazio' },
+                { title: 'Geometria Solida', desc: 'Scomposizione e analisi di poliedri' }
+            ],
+            arte: [
+                { title: 'Cappella Sistina', desc: 'Affreschi di Michelangelo in ultra-dettaglio' },
+                { title: 'Cattedrali Gotiche', desc: 'Architettura sacra in visione 360 gradi' }
+            ]
+        };
+
+        function showExperiences(materia) {
+            const container = document.getElementById('experiences-container');
+            const exps = experiences[materia];
+            
+            let html = `
+                <div style="background: rgba(0,245,255,0.05); border: 1px solid var(--cyan); border-radius: 20px; padding: 2rem; animation: fadeInUp 0.5s ease;">
+                    <h3 style="font-family: Orbitron; color: var(--cyan); margin-bottom: 1.5rem; font-size: 1.5rem;">
+                        Esperienze disponibili: ${materia.toUpperCase()}
+                    </h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+            `;
+            
+            exps.forEach((exp, index) => {
+                html += `
+                    <div style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 15px; border-left: 3px solid var(--cyan);">
+                        <h4 style="color: #fff; margin-bottom: 0.5rem; font-family: Orbitron;">${index + 1}. ${exp.title}</h4>
+                        <p style="color: rgba(255,255,255,0.7);">${exp.desc}</p>
+                    </div>
+                `;
+            });
+            
+            html += '</div></div>';
+            container.innerHTML = html;
+            container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Parallax Effect on scroll
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            document.querySelectorAll('.orb').forEach((orb, index) => {
+                const speed = 0.5 + (index * 0.2);
+                orb.style.transform = `translateY(${scrolled * speed}px)`;
+            });
+        });
+
+        // Glitch effect random trigger
+        setInterval(() => {
+            const glitch = document.querySelector('.glitch');
+            glitch.style.animation = 'none';
+            setTimeout(() => {
+                glitch.style.animation = '';
+            }, 100);
+        }, 5000);
+    </script>
+</body>
+</html>
